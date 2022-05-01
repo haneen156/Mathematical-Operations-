@@ -1,0 +1,254 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+char s1[256];
+float s2[256];
+int ctr1 = 0, ctr2 = 0;
+char top(char* x)
+{
+​if (ctr1 >= 0)
+​{
+​​*x = s1[ctr1 - 1];
+​​return 1;
+​}
+​else
+​​return 0;
+}
+int push1(char item)
+{
+​if (ctr1 < 256)
+​{
+​​s1[ctr1] = item;
+​​ctr1++;
+​​return 1;
+​}
+​else
+​​return 0;
+}
+float push2(float item)
+{
+​if (ctr2 < 256)
+​{
+​​s2[ctr2] = item;
+​​ctr2++;
+​​return 1;
+​}
+​else
+​​return 0;
+}
+ 
+int pop1(char* item)
+{
+​if (ctr1 >= 0)
+​{
+​​ctr1--;
+​​*item = s1[ctr1];
+​​return 1;
+​}
+​else
+​​return 0;
+}
+float pop2()
+{
+​if (ctr2 > 0)
+​{
+​​ctr2--;
+​​float item = s2[ctr2];
+​​return item;
+​}
+​else
+​​return 0;
+}
+int isDigit(char x)
+{
+​if (x >= '0' && x <= '9')
+​​return 1;
+​else
+​​return 0;
+}
+int priority(char x)
+{
+​if (x == '^')
+​​return 3;
+​else if (x == '*' || x == '/')
+​​return 2;
+​else if (x == '+' || x == '-')
+​​return 1;
+​else if (x == '(' )
+​​return 0;
+​return -1;
+}
+int isempty1()
+{
+​if (ctr1 == 0)
+​​return 1;
+​else
+​​return 0;
+}
+int isempty2()
+{
+​if (ctr2 == 0)
+​​return 1;
+​else
+​​return 0;
+}
+int brackets(char A[])
+{
+​char temp,y;
+ 
+​
+​for (int i = 0; i < strlen(A); i++)
+​{
+​​top(&y);
+​​if (A[i] == '(')
+​​​push1(A[i]);
+​​else if (!isempty1() && A[i] == ')' && y == '(')
+​​​pop1(&temp);
+​}
+​if (isempty1())
+​{
+​​return 1;
+​}
+ 
+​else
+​{
+​​printf("unbalanced");
+​​return 0;
+​}
+​return 1;
+ 
+}
+ 
+ 
+int main()
+{
+​char infix[256], postfix[256], temp;
+​int i, j = 0;
+​printf("enter the linear expression \n");
+​gets_s(infix);
+​int y= brackets(infix);
+​if (y == 0)
+​​return 0;
+​ctr1 = -1;
+​int size = strlen(infix);
+​for (i = 0; i < size; i++)
+​{
+​​char x = infix[i];
+​​if (isdigit(x))
+​​postfix[j++] = x;
+​​else if (x == '(')
+​​​push1(x);
+​​else if (x == '+' || x == '-' || x == '/' || x == '*' || x == '^')
+​​{
+​​​​top(&temp);
+​​​​if (priority(x) > priority(temp))
+​​​​{
+​​​​​push1(x);
+​​​​}
+​​​​else {
+​​​​​while (priority(x) <= priority(temp) && !isempty1())
+​​​​​{
+​​​​​​pop1(&temp);
+​​​​​​postfix[j++] = temp;
+​​​​​​top(&temp);
+ 
+​​​​​}
+​​​​​push1(x);
+​​​​}
+​​​
+​​}
+​​else if (x == ')')
+​​{
+​​​pop1(&temp);
+​​​while ( temp != '(')
+​​​{
+​​​​postfix[j++] = temp;
+​​​​pop1(&temp);
+​​​}
+​​}
+​​else
+​​{
+​​​printf("Invalid infix Expression");
+​​}
+​}
+​while (ctr1 > -1)
+​{
+​​pop1(&temp);
+​​postfix[j++] = temp;
+​}
+​postfix[j] = '\0';
+​printf("the postfix expression = ");
+​puts(postfix);
+​float result;
+​int postlen;
+​postlen = strlen(postfix);
+​for (int p = 0; p < postlen; p++)
+​{
+​​if (postfix[p] >= '0' && postfix[p] <= '9')
+​​{
+​​​float num = postfix[p] - '0';
+​​​push2(num);
+​​}
+​​else if (postfix[p] == '^' || postfix[p] == '*' || postfix[p] == '/' || postfix[p] == '+' || postfix[p] == '-')
+​​{
+​​​float A, B;
+​​​A = pop2();
+​​​B = pop2();
+​​​if (postfix[p] == '^')
+​​​{
+​​​​if (B == 0 && A == 0)
+​​​​{
+​​​​​printf("The expression is invalid");
+​​​​​exit(1);
+​​​​}
+​​​​else
+​​​​{
+​​​​​result = pow(B,A);
+​​​​​push2(result);
+​​​​}
+​​​}
+​​​else if (postfix[p] == '*')
+​​​{
+​​​​result = B * A;
+​​​​push2(result);
+​​​}
+​​​else if (postfix[p] == '/')
+​​​{
+​​​​if (A == 0)
+​​​​{
+​​​​​printf("Expression is invalid");
+​​​​​exit(1);
+​​​​}
+​​​​else
+​​​​{
+​​​​​result = B / A;
+​​​​​push2(result);
+​​​​}
+​​​}
+​​​else if (postfix[p] == '+')
+​​​{
+​​​​result = B + A;
+​​​​push2(result);
+​​​}
+​​​else if (postfix[p] == '-')
+​​​{
+​​​​result = B - A;
+​​​​push2(result);
+​​​}
+​​}
+ 
+​​
+​}
+​if (isempty2())
+​​printf("An error has occured");
+​else
+​​printf("The resutl is: %f ", pop2());
+ 
+ 
+​return 0;
+}
